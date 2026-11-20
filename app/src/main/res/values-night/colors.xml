@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors - Dark Mode -->
+    <color name="primary">#26A69A</color>
+    <color name="primary_dark">#00796B</color>
+    <color name="primary_light">#4DB6AC</color>
+    <color name="primary_variant">#80CBC4</color>
+
+    <!-- Accent Colors -->
+    <color name="accent">#26A69A</color>
+    <color name="accent_light">#80CBC4</color>
+
+    <!-- Income & Expense Colors - Dark Mode -->
+    <color name="income_green">#66BB6A</color>
+    <color name="income_green_light">#1B5E20</color>
+    <color name="expense_red">#EF5350</color>
+    <color name="expense_red_light">#B71C1C</color>
+
+    <!-- Warning & Alert Colors -->
+    <color name="warning_orange">#FFB74D</color>
+    <color name="warning_yellow">#FFD54F</color>
+    <color name="alert_pink">#F06292</color>
+
+    <!-- Background Colors - Dark Mode -->
+    <color name="background">#121212</color>
+    <color name="background_card">#1E1E1E</color>
+    <color name="surface">#1E1E1E</color>
+    <color name="surface_elevated">#2C2C2C</color>
+
+    <!-- Text Colors - Dark Mode -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_hint">#757575</color>
+    <color name="text_disabled">#505050</color>
+    <color name="text_on_primary">#000000</color>
+
+    <!-- Divider & Border -->
+    <color name="divider">#3D3D3D</color>
+    <color name="border">#4D4D4D</color>
+
+    <!-- Bottom Navigation - Dark Mode -->
+    <color name="bottom_nav_background">#1E1E1E</color>
+    <color name="bottom_nav_active">#26A69A</color>
+    <color name="bottom_nav_inactive">#757575</color>
+    <color name="fab_background">#26A69A</color>
+    <color name="fab_icon">#000000</color>
+
+    <!-- Status Colors - Dark Mode -->
+    <color name="success">#66BB6A</color>
+    <color name="error">#EF5350</color>
+    <color name="info">#42A5F5</color>
+
+    <!-- Progress Bar - Dark Mode -->
+    <color name="progress_background">#3D3D3D</color>
+    <color name="progress_fill">#26A69A</color>
+    <color name="progress_warning">#FFB74D</color>
+    <color name="progress_danger">#EF5350</color>
+</resources>

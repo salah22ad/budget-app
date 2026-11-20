@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">محفظتي الذكية</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_budgets">العمليات</string>
+    <string name="nav_reports">التقارير</string>
+    <string name="nav_settings">الإعدادات</string>
+    <string name="nav_reminders">التذكيرات</string>
+
+    <!-- Months -->
+    <string name="january">يناير</string>
+    <string name="february">فبراير</string>
+    <string name="march">مارس</string>
+    <string name="april">أبريل</string>
+    <string name="may">مايو</string>
+    <string name="june">يونيو</string>
+    <string name="july">يوليو</string>
+    <string name="august">أغسطس</string>
+    <string name="september">سبتمبر</string>
+    <string name="october">أكتوبر</string>
+    <string name="november">نوفمبر</string>
+    <string name="december">ديسمبر</string>
+
+
+    <!-- Budget Types -->
+    <string name="income">دخل</string>
+    <string name="expense">مصروف</string>
+    <string name="all_budgets">كل العمليات</string>
+
+    <!-- Actions -->
+    <string name="add">إضافة</string>
+    <string name="save">حفظ</string>
+    <string name="cancel">إلغاء</string>
+    <string name="delete">حذف</string>
+    <string name="edit">تعديل</string>
+    <string name="search">بحث</string>
+    <string name="filter">تصفية</string>
+    <string name="export">تصدير</string>
+
+    <!-- Form Labels -->
+    <string name="amount">المبلغ</string>
+    <string name="category">الفئة</string>
+    <string name="date">التاريخ</string>
+    <string name="note">ملاحظة</string>
+    <string name="payment_method">طريقة الدفع</string>
+    <string name="description">الوصف</string>
+
+    <!-- Categories -->
+    <string name="category_food">طعام وشراب</string>
+    <string name="category_transport">مواصلات</string>
+    <string name="category_housing">سكن وإيجار</string>
+    <string name="category_entertainment">ترفيه</string>
+    <string name="category_health">صحة</string>
+    <string name="category_shopping">تسوق</string>
+    <string name="category_education">تعليم</string>
+    <string name="category_salary">راتب</string>
+    <string name="category_gift">هدية</string>
+    <string name="category_other">أخرى</string>
+
+    <!-- Payment Methods -->
+    <string name="cash">كاش</string>
+    <string name="credit_card">بطاقة ائتمان</string>
+    <string name="bank_transfer">تحويل بنكي</string>
+    <string name="digital_wallet">محفظة إلكترونية</string>
+
+    <!-- Summary -->
+    <string name="total_income">إجمالي الدخل</string>
+    <string name="total_expense">إجمالي المصروفات</string>
+    <string name="balance">الرصيد</string>
+    <string name="budget">الميزانية</string>
+    <string name="remaining">المتبقي</string>
+    <string name="spent">المصروف</string>
+    <string name="consumed">استهلكت</string>
+
+    <!-- Messages -->
+    <string name="no_budgets">لا توجد عمليات</string>
+    <string name="add_first_budget">أضف أول عملية</string>
+    <string name="budget_exceeded">لقد تجاوزت ميزانيتك الشهرية المحددة!</string>
+    <string name="budget_warning">اقتربت من انتهاء ميزانيتك</string>
+    <string name="goal_achieved">تم تحقيق الهدف!</string>
+
+    <!-- Settings -->
+    <string name="currency">العملة</string>
+    <string name="language">اللغة</string>
+    <string name="notifications">التنبيهات</string>
+    <string name="dark_mode">الوضع الداكن</string>
+    <string name="export_pdf">تصدير تقرير PDF</string>
+    <string name="export_csv">تصدير CSV</string>
+    <string name="about">عن التطبيق</string>
+    <string name="version">الإصدار</string>
+    <string name="monthly_budget">الميزانية الشهرية</string>
+
+    <!-- Goals -->
+    <string name="goals">الأهداف</string>
+    <string name="add_goal">إضافة هدف</string>
+    <string name="goal_name">اسم الهدف</string>
+    <string name="target_amount">المبلغ المستهدف</string>
+    <string name="deadline">الموعد النهائي</string>
+    <string name="progress">التقدم</string>
+
+    <!-- Add Budget -->
+    <string name="add_budget">إضافة عملية</string>
+    <string name="add_income">إضافة دخل</string>
+    <string name="add_expense">إضافة مصروف</string>
+
+    <!-- Validation -->
+    <string name="enter_amount">أدخل المبلغ</string>
+    <string name="select_category">اختر الفئة</string>
+    <string name="select_date">اختر التاريخ</string>
+
+    <!-- Months Navigation -->
+    <string name="previous_month">الشهر السابق</string>
+    <string name="next_month">الشهر التالي</string>
+
+    <!-- Currency -->
+    <string name="currency_symbol">ج.م</string>
+    <string name="egp">ج.م</string>
+    <string name="usd">$</string>
+
+    <!-- Settings additions -->
+    <string name="save_budget">حفظ الميزانية</string>
+    <string name="budget_saved">تم حفظ الميزانية</string>
+    <string name="enter_valid_amount">أدخل مبلغاً صحيحاً</string>
+    <string name="monthly_budget_hint">مثال: 5000</string>
+
+    <!-- Charts -->
+    <string name="expense_distribution">توزيع المصروفات</string>
+    <string name="income_vs_expense">الدخل مقابل المصروفات</string>
+    <string name="monthly_comparison">المقارنة الشهرية</string>
+
+    <!-- Welcome -->
+    <string name="welcome">مرحباً بك</string>
+    <string name="financial_summary">الملخص المالي</string>
+
+    <!-- Hints -->
+    <string name="search_hint">ابحث عن عملية...</string>
+    <string name="note_hint">أضف ملاحظة (اختياري)</string>
+    <string name="amount_hint">0.00</string>
+    <string name="action_settings">الاعدادات</string>
+</resources>

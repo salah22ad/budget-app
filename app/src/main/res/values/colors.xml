@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="primary">#00897B</color>
+    <color name="primary_dark">#00695C</color>
+    <color name="primary_light">#4DB6AC</color>
+    <color name="primary_variant">#26A69A</color>
+    <color name="background_primary">#FAFAFA</color>
+    <color name="background_secondary">#F5F5F5</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- Accent Colors -->
+    <color name="accent">#00897B</color>
+    <color name="accent_light">#80CBC4</color>
+
+    <!-- Income & Expense Colors -->
+    <color name="income_green">#4CAF50</color>
+    <color name="income_green_light">#C8E6C9</color>
+    <color name="expense_red">#F44336</color>
+    <color name="expense_red_light">#FFCDD2</color>
+
+    <!-- Warning & Alert Colors -->
+    <color name="warning_orange">#FF9800</color>
+    <color name="warning_yellow">#FFC107</color>
+    <color name="alert_pink">#E91E63</color>
+
+    <!-- Category Colors (Pastel) -->
+    <color name="category_food">#FFCC80</color>
+    <color name="category_transport">#FFF59D</color>
+    <color name="category_housing">#90CAF9</color>
+    <color name="category_entertainment">#F48FB1</color>
+    <color name="category_health">#A5D6A7</color>
+    <color name="category_shopping">#CE93D8</color>
+    <color name="category_education">#81D4FA</color>
+    <color name="category_other">#B0BEC5</color>
+
+    <!-- Background Colors - Light Mode -->
+    <color name="background">#F5F5F5</color>
+    <color name="background_card">#FFFFFF</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_elevated">#FAFAFA</color>
+
+    <!-- Text Colors - Light Mode -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#9E9E9E</color>
+    <color name="text_disabled">#BDBDBD</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- Divider & Border -->
+    <color name="divider">#E0E0E0</color>
+    <color name="border">#BDBDBD</color>
+
+    <!-- Chart Colors -->
+    <color name="chart_color_1">#FF7043</color>
+    <color name="chart_color_2">#42A5F5</color>
+    <color name="chart_color_3">#66BB6A</color>
+    <color name="chart_color_4">#AB47BC</color>
+    <color name="chart_color_5">#FFA726</color>
+    <color name="chart_color_6">#26C6DA</color>
+    <color name="chart_color_7">#EC407A</color>
+    <color name="chart_color_8">#78909C</color>
+
+    <!-- Bottom Navigation -->
+    <color name="bottom_nav_background">#FFFFFF</color>
+    <color name="bottom_nav_active">#00897B</color>
+    <color name="bottom_nav_inactive">#9E9E9E</color>
+    <color name="fab_background">#00897B</color>
+    <color name="fab_icon">#FFFFFF</color>
+
+    <!-- Status Colors -->
+    <color name="success">#4CAF50</color>
+    <color name="error">#F44336</color>
+    <color name="info">#2196F3</color>
+
+    <!-- Progress Bar -->
+    <color name="progress_background">#E0E0E0</color>
+    <color name="progress_fill">#00897B</color>
+    <color name="progress_warning">#FF9800</color>
+    <color name="progress_danger">#F44336</color>
+
+    <!-- ✅ ألوان الـ Card Summary الجديد (تدرج أزرق) -->
+    <color name="gradient_start">#2196F3</color>
+    <color name="gradient_end">#3F51B5</color>
+
+    <!-- ✅ ألوان الشيب المطابقة للتصميم المرجعي -->
+    <color name="chip_bg_normal">@android:color/transparent</color>
+    <color name="chip_bg_selected">@android:color/transparent</color>
+    <color name="chip_stroke_normal">#000000</color>
+    <color name="chip_stroke_selected">#00897B</color>
+    <color name="chip_text_normal">#757575</color>
+    <color name="chip_text_selected">#00897B</color>
+    <color name="bg_input_field">#F5F5F5</color>
+
+</resources>
