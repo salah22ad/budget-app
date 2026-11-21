@@ -666,7 +666,7 @@ jobs:
           fi
 
           cp -f build_logs/*.log build_logs/*.txt aab_diagnostics_package/logs/ 2>/dev/null || true
-          zip -r "build_logs/my-smart-wallet-aab-diagnostics-${APP_VERSION}-${{ github.run_number }}.zip" aab_diagnostics_package/ || true
+          zip -r "build_logs/budget-app-aab-diagnostics-${APP_VERSION}-${{ github.run_number }}.zip" aab_diagnostics_package/ || true
 
       # 9-ب. عند حدوث خطأ في البناء: تلخيص وتجميل الأخطاء والتحذيرات في Job Summary (مع إزالة ضجيج stacktrace)
       - name: Publish Clean Error & Warning Summary to Job Summary
@@ -755,11 +755,11 @@ jobs:
         if: ${{ env.BUILD_FAILED == 'true' || failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: my-smart-wallet-${{ env.SELECTED_TYPE }}-errors-${{ env.APP_VERSION }}-${{ github.run_number }}
+          name: budget-app-${{ env.SELECTED_TYPE }}-errors-${{ env.APP_VERSION }}-${{ github.run_number }}
           path: |
             build_logs/error_summary.log
             build_logs/build_full.log
-            build_logs/my-smart-wallet-aab-diagnostics-${{ env.APP_VERSION }}-${{ github.run_number }}.zip
+            build_logs/budget-app-aab-diagnostics-${{ env.APP_VERSION }}-${{ github.run_number }}.zip
             app/build/outputs/mapping/release/*
             app/build/reports/**
             build/reports/**
@@ -778,7 +778,7 @@ jobs:
         if: ${{ success() && (github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both') }}
         uses: actions/upload-artifact@v4
         with:
-          name: my-smart-wallet-apk-${{ env.APP_VERSION }}-${{ github.run_number }}
+          name: budget-app-apk-${{ env.APP_VERSION }}-${{ github.run_number }}
           path: |
             app/build/outputs/apk/release/*.apk
             build_logs/build_full.log
@@ -790,7 +790,7 @@ jobs:
         if: ${{ success() && (github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both') }}
         uses: actions/upload-artifact@v4
         with:
-          name: my-smart-wallet-aab-${{ env.APP_VERSION }}-${{ github.run_number }}
+          name: budget-app-aab-${{ env.APP_VERSION }}-${{ github.run_number }}
           path: |
             app/build/outputs/bundle/release/*.aab
             build_logs/native-debug-symbols-${{ env.APP_VERSION }}.zip
@@ -850,7 +850,7 @@ jobs:
           set -e
           mkdir -p /tmp/new_release_files
 
-          DIAG_ZIP="build_logs/my-smart-wallet-aab-diagnostics-${APP_VERSION}-${{ github.run_number }}.zip"
+          DIAG_ZIP="build_logs/budget-app-aab-diagnostics-${APP_VERSION}-${{ github.run_number }}.zip"
           if [ -f "$DIAG_ZIP" ]; then
             mkdir -p /tmp/diagnostics_extracted
             unzip -o "$DIAG_ZIP" -d /tmp/diagnostics_extracted > /dev/null 2>&1 || true
