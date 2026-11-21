@@ -100,11 +100,11 @@ dependencies {
 
     // Firebase BoM (Bill of Materials)
     implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-functions")
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-messaging")
+ //   implementation("com.google.firebase:firebase-analytics")
+//    implementation("com.google.firebase:firebase-functions")
+ //   implementation("com.google.firebase:firebase-auth")
+      implementation("com.google.firebase:firebase-firestore")
+ //   implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.firebase:firebase-crashlytics")
-    implementation("com.google.firebase:firebase-appcheck-playintegrity")
+//    implementation("com.google.firebase:firebase-appcheck-playintegrity")
 }
