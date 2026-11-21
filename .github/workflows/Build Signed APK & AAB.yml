@@ -128,7 +128,6 @@ jobs:
           echo "ANDROID_HOME=${ANDROID_HOME}" >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=${ANDROID_HOME}" >> $GITHUB_ENV
 
-          # استخراج معرف وتوكن فيسبوك من GitHub Secrets (مع خيار احتياطي من strings.xml إن وجد)
           FB_APP_ID="$FB_APP_ID_SECRET"
           FB_CLIENT_TOKEN="$FB_CLIENT_TOKEN_SECRET"
 
@@ -146,7 +145,6 @@ jobs:
             exit 1
           fi
 
-          # كتابة مسار SDK ومعرفات فيسبوك في local.properties المؤقت على خادم البناء دون التأثير على نسخة الويندوز
           {
             echo "sdk.dir=${ANDROID_HOME}"
             echo "FACEBOOK_APP_ID=${FB_APP_ID}"
@@ -162,12 +160,21 @@ jobs:
 
           sed -i 's/\r$//' gradlew gradle.properties gradle/wrapper/gradle-wrapper.properties "$GRADLE_APP_FILE" app/proguard-rules.pro 2>/dev/null || true
 
-          # 1) تحديث أسطر التوقيع الموجودة داخل signingConfigs في مكانها بدون حذف أي أقواس
+          # 1) تحديث أسطر التوقيع الموجودة داخل signingConfigs (يدعم القيم الصلبة و keystoreProperties)
           if grep -q '^\s*signingConfigs\s*{' "$GRADLE_APP_FILE"; then
+            # استبدال مسار المفتاح أياً كان (F أو D، حروف كبيرة أو صغيرة)
+            sed -i 's|storeFile = file("F:.*|storeFile = file(System.getenv("SIGNING_STORE_FILE") ?: "")|g' "$GRADLE_APP_FILE"
+            sed -i 's|storeFile = file("D:.*|storeFile = file(System.getenv("SIGNING_STORE_FILE") ?: "")|g' "$GRADLE_APP_FILE"
+            sed -i 's|storeFile\s*=\s*keystoreProperties\["RELEASE_STORE_FILE"\].*|storeFile = file(System.getenv("SIGNING_STORE_FILE") ?: "")|g' "$GRADLE_APP_FILE"
+            
+            # استبدال البيانات الصلبة (Hardcoded)
+            sed -i 's|storePassword = "123456"|storePassword = System.getenv("SIGNING_STORE_PASSWORD")|g' "$GRADLE_APP_FILE"
+            sed -i 's|keyAlias = "key0"|keyAlias = System.getenv("SIGNING_KEY_ALIAS")|g' "$GRADLE_APP_FILE"
+            sed -i 's|keyPassword = "123456"|keyPassword = System.getenv("SIGNING_KEY_PASSWORD")|g' "$GRADLE_APP_FILE"
+
+            # استبدال البيانات التي تعتمد على keystoreProperties (إن وجدت)
             sed -i 's|keyAlias\s*=\s*keystoreProperties\["RELEASE_KEY_ALIAS"\].*|keyAlias = System.getenv("SIGNING_KEY_ALIAS")|g' "$GRADLE_APP_FILE"
             sed -i 's|keyPassword\s*=\s*keystoreProperties\["RELEASE_KEY_PASSWORD"\].*|keyPassword = System.getenv("SIGNING_KEY_PASSWORD")|g' "$GRADLE_APP_FILE"
-            sed -i 's|storeFile\s*=\s*file("F:\\\\android\\\\key3\.jks")|storeFile = file(System.getenv("SIGNING_STORE_FILE") ?: "")|g' "$GRADLE_APP_FILE"
-            sed -i 's|storeFile\s*=\s*file("D:\\\\android\\\\key3\.jks")|storeFile = file(System.getenv("SIGNING_STORE_FILE") ?: "")|g' "$GRADLE_APP_FILE"
             sed -i 's|storePassword\s*=\s*keystoreProperties\["RELEASE_STORE_PASSWORD"\].*|storePassword = System.getenv("SIGNING_STORE_PASSWORD")|g' "$GRADLE_APP_FILE"
           else
             echo '    signingConfigs {' > /tmp/signing_block.kts
@@ -183,9 +190,11 @@ jobs:
             rm -f /tmp/signing_block.kts
           fi
 
-          # 2) إزالة سطر التوقيع من داخل debug وإضافته داخل release تحت isShrinkResources = true
+          # 2) إزالة سطر التوقيع من داخل defaultConfig وإضافته داخل release
+          # هذا يحل مشكلة الـ debug التي كانت تحاول استخدام مسار الويندوز
           sed -i '/signingConfigs\.getByName("debug")/d' "$GRADLE_APP_FILE"
           sed -i '/signingConfig\s*=\s*signingConfigs\.getByName("release")/d' "$GRADLE_APP_FILE"
+          sed -i '/release {/a \            signingConfig = signingConfigs.getByName("release")' "$GRADLE_APP_FILE"
           sed -i '/isShrinkResources\s*=\s*true/a \            signingConfig = signingConfigs.getByName("release")' "$GRADLE_APP_FILE"
 
           echo "==================================================================" | tee -a build_logs/build_full.log
@@ -208,7 +217,6 @@ jobs:
             curl -fsSL "https://raw.githubusercontent.com/gradle/gradle/v9.5.0/gradle/wrapper/gradle-wrapper.jar" -o gradle/wrapper/gradle-wrapper.jar
           fi
 
-          # ضبط الذاكرة والأداء لبيئة CI فقط دون أي خصائص deprecated في Gradle 9.5 / AGP 9.3.3
           printf "\n" >> gradle.properties
           sed -i '/^org\.gradle\.jvmargs=/d' gradle.properties
           sed -i '/^#.*org\.gradle\.parallel=/d' gradle.properties
@@ -587,7 +595,7 @@ jobs:
                   sf.write("## تقرير DEX والتمويه\n\n```\n" + report_text + "```\n\n")
                   if r8_json_data is not None and "stats" in r8_json_data:
                       sf.write("## نسب R8 الرسمية من r8.json\n\n```json\n" + json.dumps(r8_json_data["stats"], indent=2) + "\n```\n\n")
-                  sf.write("## تفكيك حجم DEX\n\n```\n" + breakdown_text + "```\n")
+                  sf.write("## تفكيك حجم DEX\n\n```\n" + breakdown_text + "\n```\n")
           PYEOF
           exit 0
 
