@@ -16,9 +16,9 @@
 # Firebase Core & Components
 # ==========================================
 -keep class com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
+#-keep class com.google.android.gms.** { *; }
 -dontwarn com.google.firebase.**
--dontwarn com.google.android.gms.**
+#-dontwarn com.google.android.gms.**
 
 # ==========================================
 # Firebase Firestore (Critical for Serialization)
@@ -32,34 +32,6 @@
 
 # Keep your data models (Critical for Firestore toObject / toObject)
 -keep class com.smartwallet.data.model.** { *; }
-
-# ==========================================
-# Firebase Auth
-# ==========================================
--keep class com.google.firebase.auth.** { *; }
--keep class com.google.android.gms.auth.** { *; }
--keep class com.google.android.gms.common.** { *; }
-
-# ==========================================
-# Firebase Messaging (FCM)
-# ==========================================
--keep class com.google.firebase.messaging.** { *; }
--keep class com.google.firebase.iid.** { *; }
-
-# ==========================================
-# Firebase Crashlytics
-# ==========================================
--keep class com.google.firebase.crashlytics.** { *; }
--keepattributes SourceFile,LineNumberTable
--keep public class * extends java.lang.Exception
-
-# ==========================================
-# Firebase Analytics & AppCheck
-# ==========================================
--keep class com.google.firebase.analytics.** { *; }
--keep class com.google.firebase.appcheck.** { *; }
--keep class com.google.firebase.appcheck.playintegrity.** { *; }
-
 # ==========================================
 # Room Database
 # ==========================================

@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+ //   id("com.google.gms.google-services")
+   // id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -97,14 +97,14 @@ dependencies {
     
     // Fragment
     implementation("androidx.fragment:fragment:1.8.9")
-
+implementation("com.google.firebase:firebase-firestore:24.10.0")
     // Firebase BoM (Bill of Materials)
-    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+ //   implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
  //   implementation("com.google.firebase:firebase-analytics")
 //    implementation("com.google.firebase:firebase-functions")
  //   implementation("com.google.firebase:firebase-auth")
-      implementation("com.google.firebase:firebase-firestore")
+//      implementation("com.google.firebase:firebase-firestore")
  //   implementation("com.google.firebase:firebase-messaging")
-    implementation("com.google.firebase:firebase-crashlytics")
+//    implementation("com.google.firebase:firebase-crashlytics")
 //    implementation("com.google.firebase:firebase-appcheck-playintegrity")
 }
