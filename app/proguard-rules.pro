@@ -33,6 +33,14 @@
 # Keep your data models (Critical for Firestore toObject / toObject)
 -keep class com.smartwallet.data.model.** { *; }
 # ==========================================
+# Firebase Crashlytics
+# ==========================================
+-keep class com.google.firebase.crashlytics.** { *; }
+-keepattributes SourceFile,LineNumberTable
+-keep public class * extends java.lang.Exception
+
+
+# ==========================================
 # Room Database
 # ==========================================
 -keep class * extends androidx.room.RoomDatabase
