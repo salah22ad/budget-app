@@ -276,7 +276,6 @@ jobs:
           echo "=== بدء بناء نسخة Release APK ===" | tee -a build_logs/build_full.log
           ./gradlew assembleRelease \
             -x lint -x lintVitalRelease \
-            -x uploadCrashlyticsMappingFileRelease \
             --max-workers=2 --stacktrace 2>&1 | tee -a build_logs/build_full.log
           GRADLE_EXIT=${PIPESTATUS[0]}
           ./gradlew --stop 2>/dev/null || true
@@ -318,7 +317,6 @@ jobs:
           echo "=== بدء بناء نسخة Release AAB وتوليد mergeReleaseNativeLibs ===" | tee -a build_logs/build_full.log
           ./gradlew bundleRelease mergeReleaseNativeLibs \
             -x lint -x lintVitalRelease \
-            -x uploadCrashlyticsMappingFileRelease \
             --max-workers=2 --stacktrace 2>&1 | tee -a build_logs/build_full.log
           GRADLE_EXIT=${PIPESTATUS[0]}
           ./gradlew --stop 2>/dev/null || true
