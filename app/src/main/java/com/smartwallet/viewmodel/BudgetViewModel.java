@@ -3,6 +3,7 @@ package com.smartwallet.viewmodel;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -40,7 +41,6 @@ public class BudgetViewModel extends AndroidViewModel {
         super(application);
         repository = new BudgetRepository(application);
 
-        // ✅ تحميل الميزانية المحفوظة
         SharedPreferences prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         float saved = prefs.getFloat(KEY_MONTHLY_BUDGET, (float) DEFAULT_MONTHLY_BUDGET);
         monthlyBudget.setValue((double) saved);
@@ -76,9 +76,20 @@ public class BudgetViewModel extends AndroidViewModel {
     public void goToNextMonth() {
         Calendar cal = currentMonth.getValue();
         if (cal != null) {
-            Calendar newCal = (Calendar) cal.clone();
-            newCal.add(Calendar.MONTH, 1);
-            currentMonth.setValue(newCal);
+            Calendar nextMonth = (Calendar) cal.clone();
+            nextMonth.add(Calendar.MONTH, 1);
+
+            // ✅ التحقق من عدم تجاوز الشهر الحالي
+            Calendar currentRealMonth = Calendar.getInstance();
+            // توحيد اليوم لتجنب أخطاء المقارنة
+            nextMonth.set(Calendar.DAY_OF_MONTH, 1);
+            currentRealMonth.set(Calendar.DAY_OF_MONTH, 1);
+
+            if (!nextMonth.after(currentRealMonth)) {
+                currentMonth.setValue(nextMonth);
+            } else {
+                Toast.makeText(getApplication(), "لا يمكن الانتقال إلى شهر مستقبلي", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -98,7 +109,6 @@ public class BudgetViewModel extends AndroidViewModel {
     public LiveData<Double> getTotalExpense() { return totalExpense; }
     public LiveData<Double> getMonthlyBudget() { return monthlyBudget; }
 
-    /** ✅ حفظ دائم في SharedPreferences */
     public void setMonthlyBudget(double budget) {
         monthlyBudget.setValue(budget);
         getApplication().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -112,10 +122,8 @@ public class BudgetViewModel extends AndroidViewModel {
     public void delete(Budget budget) { repository.delete(budget); }
 
     public LiveData<Budget> getBudgetById(long id) { return repository.getBudgetById(id); }
-
     public LiveData<List<Budget>> searchBudgets(String query) { return repository.searchBudgets(query); }
 
-    /** ✅ بيانات المخطط الشريطي لآخر 6 أشهر (من الشهر الحالي للخلف) */
     public LiveData<List<MonthlyAggregate>> getLast6MonthsAggregates() {
         Calendar cal = currentMonth.getValue();
         if (cal == null) cal = Calendar.getInstance();
@@ -126,7 +134,7 @@ public class BudgetViewModel extends AndroidViewModel {
         start.set(Calendar.MINUTE, 0);
         start.set(Calendar.SECOND, 0);
         start.set(Calendar.MILLISECOND, 0);
-        start.add(Calendar.MONTH, -5); // 5 أشهر للخلف + الشهر الحالي = 6
+        start.add(Calendar.MONTH, -5);
 
         long[] endRange = getMonthRange(cal);
         return repository.getMonthlyAggregates(start.getTimeInMillis(), endRange[1]);
