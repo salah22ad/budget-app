@@ -1,0 +1,175 @@
+==================================================================
+🔍 الفحص الأول: التحقق من ملف المفتاح المستخرج من KEYSTORE_BASE64
+==================================================================
+🔹 البصمة الموجودة فعلياً داخل KEYSTORE_BASE64 : 1C:36:97:38:51:F5:85:01:A8:EA:6C:94:15:51:1C:EC:7A:0F:AB:1A:F8:35:73:2A:65:81:BA:62:67:27:39:0D
+🔹 البصمة المطلوبة لمفتاح التحميل (Upload Key) : 1C:36:97:38:51:F5:85:01:A8:EA:6C:94:15:51:1C:EC:7A:0F:AB:1A:F8:35:73:2A:65:81:BA:62:67:27:39:0D
+✅ الفحص الأول نجح: ملف المفتاح يطابق بصمة مفتاح التحميل 100%.
+✅ تم حقن FACEBOOK_APP_ID و FACEBOOK_CLIENT_TOKEN في local.properties بنجاح.
+==================================================================
+📄 محتوى app/build.gradle.kts بعد تنفيذ أوامر sed:
+==================================================================
+15-        create("release") {
+16-            storeFile = file(System.getenv("SIGNING_STORE_FILE") ?: "")
+17-            storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+18-            keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+19-            keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+20-        }
+21-    }
+22-    namespace = "com.smartwallet"
+23-    compileSdk = 36
+24-    defaultConfig {
+25-        applicationId = "com.smartwallet"
+26-        minSdk = 24
+27-        targetSdk = 36
+28-        versionCode = 1
+29-        versionName = "1.0.1"
+30-
+31-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+32-        versionNameSuffix = "budget_"
+33-        proguardFiles("proguard-rules.pro")
+34-        applicationIdSuffix = "smartwallet"
+35-    }
+36-
+37:    buildTypes {
+38-        release {
+39-            signingConfig = signingConfigs.getByName("release")
+40-            // ✅ تفعيل R8 الكامل (تقليص، تحسين، تشفير)
+41-            isMinifyEnabled = true
+42-            // ✅ تفعيل تقليص الموارد
+43-            isShrinkResources = true
+44-            signingConfig = signingConfigs.getByName("release")
+45-            proguardFiles(
+46-                getDefaultProguardFile("proguard-android-optimize.txt"),
+47-                "proguard-rules.pro"
+48-            )
+49-        }
+50-    }
+51-    compileOptions {
+52-        sourceCompatibility = JavaVersion.VERSION_11
+53-        targetCompatibility = JavaVersion.VERSION_11
+54-    }
+55-    buildFeatures {
+56-        viewBinding = true
+57-        dataBinding = true
+58-    }
+59-    
+==================================================================
+==================================================================
+🔍 الفحص الثاني (بعد sed وقبل البناء): استخراج بصمة التوقيع الفعلية من Gradle عبر signingReport
+==================================================================
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Aden
+
+Welcome to Gradle 9.5.0!
+
+Here are the highlights of this release:
+ - Task provenance in reports and failure messages
+ - Type-safe accessors for precompiled Kotlin Settings plugins
+
+For more details see https://docs.gradle.org/9.5.0/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+
+> Task :app:signingReport
+Variant: debug
+Config: debug
+Store: /home/runner/work/budget-app/budget-app/app/release.jks
+Alias: key0
+MD5: 0C:77:B8:B3:4D:A2:CC:D2:A2:FA:CF:1F:DB:93:47:83
+SHA1: 1F:94:F6:DD:5C:3B:4B:97:F0:75:B2:FE:C1:C1:C9:8A:41:19:EE:40
+SHA-256: 1C:36:97:38:51:F5:85:01:A8:EA:6C:94:15:51:1C:EC:7A:0F:AB:1A:F8:35:73:2A:65:81:BA:62:67:27:39:0D
+Valid until: Wednesday, November 24, 2049
+----------
+Variant: release
+Config: release
+Store: /home/runner/work/budget-app/budget-app/app/release.jks
+Alias: key0
+MD5: 0C:77:B8:B3:4D:A2:CC:D2:A2:FA:CF:1F:DB:93:47:83
+SHA1: 1F:94:F6:DD:5C:3B:4B:97:F0:75:B2:FE:C1:C1:C9:8A:41:19:EE:40
+SHA-256: 1C:36:97:38:51:F5:85:01:A8:EA:6C:94:15:51:1C:EC:7A:0F:AB:1A:F8:35:73:2A:65:81:BA:62:67:27:39:0D
+Valid until: Wednesday, November 24, 2049
+----------
+Variant: debugAndroidTest
+Config: debug
+Store: /home/runner/work/budget-app/budget-app/app/release.jks
+Alias: key0
+MD5: 0C:77:B8:B3:4D:A2:CC:D2:A2:FA:CF:1F:DB:93:47:83
+SHA1: 1F:94:F6:DD:5C:3B:4B:97:F0:75:B2:FE:C1:C1:C9:8A:41:19:EE:40
+SHA-256: 1C:36:97:38:51:F5:85:01:A8:EA:6C:94:15:51:1C:EC:7A:0F:AB:1A:F8:35:73:2A:65:81:BA:62:67:27:39:0D
+Valid until: Wednesday, November 24, 2049
+----------
+
+BUILD SUCCESSFUL in 6s
+1 actionable task: 1 executed
+🔹 البصمة التي قرأها Gradle فعلياً لنسخة release : 1C:36:97:38:51:F5:85:01:A8:EA:6C:94:15:51:1C:EC:7A:0F:AB:1A:F8:35:73:2A:65:81:BA:62:67:27:39:0D
+🔹 البصمة المطلوبة لمفتاح التحميل (Upload Key)  : 1C:36:97:38:51:F5:85:01:A8:EA:6C:94:15:51:1C:EC:7A:0F:AB:1A:F8:35:73:2A:65:81:BA:62:67:27:39:0D
+✅ الفحص الثاني نجح: Gradle مرتبط رسمياً بمفتاح التحميل الصحيح (1C:36:97:38:51:F5:85:01:A8:EA:6C:94:15:51:1C:EC:7A:0F:AB:1A:F8:35:73:2A:65:81:BA:62:67:27:39:0D) وجاهز للبناء!
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Aden
+> Task :app:clean UP-TO-DATE
+> Task :clean UP-TO-DATE
+
+BUILD SUCCESSFUL in 567ms
+2 actionable tasks: 2 up-to-date
+=== بدء بناء نسخة Release APK ===
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Aden
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:mergeReleaseJniLibFolders
+> Task :app:mergeReleaseNativeLibs NO-SOURCE
+> Task :app:stripReleaseDebugSymbols NO-SOURCE
+> Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:dataBindingMergeDependencyArtifactsRelease
+> Task :app:generateReleaseResources FROM-CACHE
+> Task :app:mergeReleaseResources FROM-CACHE
+> Task :app:packageReleaseResources FROM-CACHE
+> Task :app:processReleaseNavigationResources FROM-CACHE
+> Task :app:parseReleaseLocalResources FROM-CACHE
+> Task :app:dataBindingGenBaseClassesRelease FROM-CACHE
+> Task :app:dataBindingTriggerRelease
+> Task :app:generateReleaseRFile FROM-CACHE
+> Task :app:compileReleaseKotlin NO-SOURCE
+> Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:compileReleaseJavaWithJavac FROM-CACHE
+> Task :app:mergeReleaseArtProfile
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:checkReleaseAarMetadata
+> Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease FROM-CACHE
+> Task :app:processReleaseMainManifest FROM-CACHE
+> Task :app:processReleaseManifest FROM-CACHE
+> Task :app:processReleaseManifestForPackage FROM-CACHE
+> Task :app:processReleaseResources FROM-CACHE
+> Task :app:expandReleaseArtProfileWildcards FROM-CACHE
+> Task :app:extractProguardFiles
+> Task :app:mergeReleaseGeneratedProguardFiles
+> Task :app:processReleaseJavaRes
+> Task :app:mergeReleaseStartupProfile
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets
+> Task :app:compressReleaseAssets FROM-CACHE
+> Task :app:extractReleaseVersionControlInfo
+> Task :app:collectReleaseDependencies
+> Task :app:sdkReleaseDependencyData
+> Task :app:validateSigningRelease
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+> Task :app:mergeReleaseJavaResource
+> Task :app:minifyReleaseWithR8 FROM-CACHE
+> Task :app:compileReleaseArtProfile FROM-CACHE
+> Task :app:convertShrunkResourcesToBinaryRelease FROM-CACHE
+> Task :app:optimizeReleaseResources FROM-CACHE
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :app:assembleRelease
+
+BUILD SUCCESSFUL in 6s
+43 actionable tasks: 22 executed, 21 from cache
+=== شهادة وبصمة ملف APK الناتج ===
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Aden
+V2 Signer: certificate DN: C=YE, ST=Taiz, L=Taiz, O=HPP, CN=Salah Ahmed
+V2 Signer: certificate SHA-256 digest: 1c36973851f58501a8ea6c9415511cec7a0fab1af835732a6581ba626727390d
+V2 Signer: certificate SHA-1 digest: 1f94f6dd5c3b4b97f075b2fec1c1c98a4119ee40
+V2 Signer: certificate MD5 digest: 0c77b8b34da2ccd2a2facf1fdb934783
+✅ تم التأكد القاطع من توقيع ملف APK ببصمة مفتاح التحميل الصحيحة!
