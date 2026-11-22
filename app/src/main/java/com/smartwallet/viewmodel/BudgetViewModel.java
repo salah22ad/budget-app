@@ -31,7 +31,7 @@ public class BudgetViewModel extends AndroidViewModel {
     private final BudgetRepository repository;
     private final MutableLiveData<Calendar> currentMonth = new MutableLiveData<>();
     private final MutableLiveData<Double> monthlyBudget = new MutableLiveData<>(DEFAULT_MONTHLY_BUDGET);
-    private final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM yyyy", new Locale("ar", "EG"));
+    private final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM yyyy", Locale.US);
 
     private final LiveData<List<Budget>> currentMonthBudgets;
     private final LiveData<Double> totalIncome;

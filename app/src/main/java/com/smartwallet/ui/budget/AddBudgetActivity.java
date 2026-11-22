@@ -40,7 +40,7 @@ public class AddBudgetActivity extends AppCompatActivity {
     private final MutableLiveData<Integer> currentType = new MutableLiveData<>(1);
     private MediatorLiveData<List<Category>> categoriesLive;
 
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", new Locale("ar"));
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

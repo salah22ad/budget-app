@@ -48,7 +48,7 @@ public class AddBudgetDialog extends DialogFragment {
     private boolean editModeLoaded = false;
     private boolean observersSetup = false;
 
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", new Locale("ar", "EG"));
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
 
     @Nullable
     @Override

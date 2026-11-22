@@ -73,7 +73,7 @@ public class HomeFragment extends Fragment {
 
         binding.progressBudget.setProgress(0);
         binding.tvConsumedPercentage.setText("0%");
-        binding.tvRemaining.setText("المتبقي: 0 " + getString(R.string.egp));
+        binding.tvRemaining.setText("المتبقي: 0");
     }
 
     private void setupPieChart() {
@@ -232,7 +232,7 @@ public class HomeFragment extends Fragment {
         String[] labels = new String[6];
 
         SimpleDateFormat keyFormat = new SimpleDateFormat("yyyy-MM", Locale.US);
-        SimpleDateFormat labelFormat = new SimpleDateFormat("MMM", FormatUtils.AR_EG);
+        SimpleDateFormat labelFormat = new SimpleDateFormat("MMM", FormatUtils.LOCALE);
 
         Calendar cursor = (Calendar) start.clone();
         for (int i = 0; i < 6; i++) {
