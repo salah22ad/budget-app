@@ -15,7 +15,7 @@ on:
       update_branch:
         description: 'تحديث ودمج فرع الإصدار عند وجوده مسبقاً (force push) - الافتراضي: معطّل'
         required: false
-        default: false
+        default: true
         type: boolean
 
 permissions:
@@ -28,17 +28,14 @@ jobs:
     env:
       TZ: "Asia/Aden"
       JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8 -Duser.timezone=Asia/Aden"
-      # بصمة مفتاح التحميل المعتمدة المستخرجة من Android Studio
       EXPECTED_UPLOAD_SHA256: "1C:36:97:38:51:F5:85:01:A8:EA:6C:94:15:51:1C:EC:7A:0F:AB:1A:F8:35:73:2A:65:81:BA:62:67:27:39:0D"
 
     steps:
-      # 1. سحب ملفات المشروع من الفرع المحدد في قائمة GitHub المباشرة
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2. إعداد بيئة Java 21
       - name: Set up JDK 21 with Gradle Cache
         uses: actions/setup-java@v4
         with:
@@ -46,8 +43,7 @@ jobs:
           java-version: '21'
           cache: 'gradle'
 
-      # 3. الفحص الأول: فك تشفير المفتاح والتأكد من بصمته مباشرة عبر keytool (قبل sed)
-      - name: Step 1 - Validate Keystore File Fingerprint (Pre-Sed)
+      - name: Step 1 - Validate Keystore File Fingerprint & Inject Google Services
         run: |
           set -e
           rm -rf build app/build build_logs aab_diagnostics_package "${{ github.workspace }}/app/release.jks"
@@ -56,6 +52,13 @@ jobs:
 
           echo "BUILD_FAILED=false" >> $GITHUB_ENV
 
+          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
+            echo "✅ تم حقن ملف google-services.json بنجاح."
+          else
+            echo "⚠️ تحذير: لم يتم العثور على GOOGLE_SERVICES_JSON في Secrets. التطبيق قد ينهار."
+          fi
+
           GRADLE_APP_FILE="app/build.gradle.kts"
           if [ ! -f "$GRADLE_APP_FILE" ] && [ -f "app/build.gradle" ]; then
             GRADLE_APP_FILE="app/build.gradle"
@@ -63,15 +66,11 @@ jobs:
           echo "GRADLE_APP_FILE=${GRADLE_APP_FILE}" >> $GITHUB_ENV
 
           APP_VERSION=`grep -oP 'versionName\s*=?\s*["'\'']\K[^"'\'']+' "$GRADLE_APP_FILE" | head -n 1`
-          if [ -z "$APP_VERSION" ]; then
-            APP_VERSION="1.0.0"
-          fi
+          if [ -z "$APP_VERSION" ]; then APP_VERSION="1.0.0"; fi
           echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
 
           SELECTED_TYPE="${{ github.event.inputs.build_type }}"
-          if [ -z "$SELECTED_TYPE" ]; then
-            SELECTED_TYPE="both"
-          fi
+          if [ -z "$SELECTED_TYPE" ]; then SELECTED_TYPE="both"; fi
           echo "SELECTED_TYPE=${SELECTED_TYPE}" >> $GITHUB_ENV
 
           echo "==================================================================" | tee -a build_logs/build_full.log
@@ -100,14 +99,12 @@ jobs:
 
           if [ "$ACTUAL_KEY_SHA256" != "$EXPECTED_UPLOAD_SHA256" ]; then
             echo "❌ خطأ حرج: البصمة داخل KEYSTORE_BASE64 ($ACTUAL_KEY_SHA256) غير مطابقة لبصمة مفتاح التحميل ($EXPECTED_UPLOAD_SHA256)!" | tee -a build_logs/build_full.log
-            echo "⛔ تم إيقاف البناء فوراً قبل البدء!" | tee -a build_logs/build_full.log
             echo "BUILD_FAILED=true" >> $GITHUB_ENV
             exit 1
           fi
 
           echo "✅ الفحص الأول نجح: ملف المفتاح يطابق بصمة مفتاح التحميل 100%." | tee -a build_logs/build_full.log
 
-      # 4. إعداد Android SDK وحقن المفتاح ومعرفات فيسبوك بأمر sed الآمن ثم الفحص الثاني عبر signingReport
       - name: Step 2 - Inject via sed & Verify Gradle Signing Fingerprint Before Build
         if: ${{ success() && env.BUILD_FAILED != 'true' }}
         env:
@@ -140,7 +137,6 @@ jobs:
 
           if [ -z "$FB_APP_ID" ] || [ -z "$FB_CLIENT_TOKEN" ]; then
             echo "❌ خطأ حرج: قيم FACEBOOK_APP_ID أو FACEBOOK_CLIENT_TOKEN مفقودة!" | tee -a build_logs/build_full.log
-            echo "💡 أضف FACEBOOK_APP_ID و FACEBOOK_CLIENT_TOKEN في GitHub Secrets (انسخهما من ملف local.properties في الويندوز)." | tee -a build_logs/build_full.log
             echo "BUILD_FAILED=true" >> $GITHUB_ENV
             exit 1
           fi
@@ -160,19 +156,15 @@ jobs:
 
           sed -i 's/\r$//' gradlew gradle.properties gradle/wrapper/gradle-wrapper.properties "$GRADLE_APP_FILE" app/proguard-rules.pro 2>/dev/null || true
 
-          # 1) تحديث أسطر التوقيع الموجودة داخل signingConfigs (يدعم القيم الصلبة و keystoreProperties)
           if grep -q '^\s*signingConfigs\s*{' "$GRADLE_APP_FILE"; then
-            # استبدال مسار المفتاح أياً كان (F أو D، حروف كبيرة أو صغيرة)
             sed -i 's|storeFile = file("F:.*|storeFile = file(System.getenv("SIGNING_STORE_FILE") ?: "")|g' "$GRADLE_APP_FILE"
             sed -i 's|storeFile = file("D:.*|storeFile = file(System.getenv("SIGNING_STORE_FILE") ?: "")|g' "$GRADLE_APP_FILE"
             sed -i 's|storeFile\s*=\s*keystoreProperties\["RELEASE_STORE_FILE"\].*|storeFile = file(System.getenv("SIGNING_STORE_FILE") ?: "")|g' "$GRADLE_APP_FILE"
             
-            # استبدال البيانات الصلبة (Hardcoded)
             sed -i 's|storePassword = "123456"|storePassword = System.getenv("SIGNING_STORE_PASSWORD")|g' "$GRADLE_APP_FILE"
             sed -i 's|keyAlias = "key0"|keyAlias = System.getenv("SIGNING_KEY_ALIAS")|g' "$GRADLE_APP_FILE"
             sed -i 's|keyPassword = "123456"|keyPassword = System.getenv("SIGNING_KEY_PASSWORD")|g' "$GRADLE_APP_FILE"
 
-            # استبدال البيانات التي تعتمد على keystoreProperties (إن وجدت)
             sed -i 's|keyAlias\s*=\s*keystoreProperties\["RELEASE_KEY_ALIAS"\].*|keyAlias = System.getenv("SIGNING_KEY_ALIAS")|g' "$GRADLE_APP_FILE"
             sed -i 's|keyPassword\s*=\s*keystoreProperties\["RELEASE_KEY_PASSWORD"\].*|keyPassword = System.getenv("SIGNING_KEY_PASSWORD")|g' "$GRADLE_APP_FILE"
             sed -i 's|storePassword\s*=\s*keystoreProperties\["RELEASE_STORE_PASSWORD"\].*|storePassword = System.getenv("SIGNING_STORE_PASSWORD")|g' "$GRADLE_APP_FILE"
@@ -190,8 +182,6 @@ jobs:
             rm -f /tmp/signing_block.kts
           fi
 
-          # 2) إزالة سطر التوقيع من داخل defaultConfig وإضافته داخل release
-          # هذا يحل مشكلة الـ debug التي كانت تحاول استخدام مسار الويندوز
           sed -i '/signingConfigs\.getByName("debug")/d' "$GRADLE_APP_FILE"
           sed -i '/signingConfig\s*=\s*signingConfigs\.getByName("release")/d' "$GRADLE_APP_FILE"
           sed -i '/release {/a \            signingConfig = signingConfigs.getByName("release")' "$GRADLE_APP_FILE"
@@ -255,7 +245,6 @@ jobs:
 
           if [ "$GRADLE_RELEASE_SHA256" != "$EXPECTED_UPLOAD_SHA256" ]; then
             echo "❌ خطأ حرج بعد sed: البصمة التي قرأها Gradle لنسخة release ($GRADLE_RELEASE_SHA256) لا تطابق بصمة مفتاح التحميل ($EXPECTED_UPLOAD_SHA256)!" | tee -a build_logs/build_full.log
-            echo "⛔ تم إيقاف البناء فوراً قبل البدء بأي تجميع!" | tee -a build_logs/build_full.log
             echo "BUILD_FAILED=true" >> $GITHUB_ENV
             exit 1
           fi
@@ -263,7 +252,6 @@ jobs:
           echo "✅ الفحص الثاني نجح: Gradle مرتبط رسمياً بمفتاح التحميل الصحيح ($EXPECTED_UPLOAD_SHA256) وجاهز للبناء!" | tee -a build_logs/build_full.log
           ./gradlew clean --max-workers=2 --stacktrace 2>&1 | tee -a build_logs/build_full.log
 
-      # 5. بناء نسخة APK وتأكيد مطابقتها لبصمة مفتاح التحميل
       - name: Build & Verify Signed Release APK
         if: ${{ success() && env.BUILD_FAILED != 'true' && (github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both') }}
         env:
@@ -302,7 +290,6 @@ jobs:
           done
           exit 0
 
-      # 6. بناء نسخة AAB وتوليد مجلدات mergeReleaseNativeLibs وتأكيد مطابقتها لبصمة مفتاح التحميل
       - name: Build & Verify Signed Release AAB & Native Debug Symbols
         if: ${{ success() && env.BUILD_FAILED != 'true' && (github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both') }}
         env:
@@ -344,7 +331,6 @@ jobs:
           done
           exit 0
 
-      # 7. استرجاع ملف build.gradle.kts الأصلي فوراً بعد انتهاء البناء
       - name: Restore Original build.gradle.kts
         if: always()
         run: |
@@ -353,7 +339,6 @@ jobs:
             echo "تم استرجاع ملف $GRADLE_APP_FILE إلى حالته الأصلية بنجاح."
           fi
 
-      # 8. فحص تشفير وتمويه وتفكيك DEX + استخراج r8.json لكل من APK و AAB ونشر الملخص
       - name: Inspect DEX Obfuscation, Breakdown & r8.json (APK & AAB)
         if: ${{ success() && env.BUILD_FAILED != 'true' }}
         run: |
@@ -401,7 +386,6 @@ jobs:
                   return ".".join(parts[:3])
               return ".".join(parts[:3]) if len(parts) >= 3 else ".".join(parts[:2])
 
-          # 1) استخراج r8.json الرسمي من حزمة AAB إن وُجد
           r8_lines = []
           r8_json_data = None
           with zipfile.ZipFile(artifact_path, "r") as z:
@@ -425,7 +409,6 @@ jobs:
           with open(r8_json_summary_file, "w", encoding="utf-8") as out:
               out.write("\n".join(r8_lines) + "\n")
 
-          # 2) فحص حجم وتمويه DEX
           lines = []
           def log(msg=""):
               print(msg)
@@ -509,7 +492,6 @@ jobs:
           with open(f"{summary_dir}/dex_obfuscation_report.txt", "w", encoding="utf-8") as out:
               out.write(report_text)
 
-          # 3) تفكيك حجم البايت-كود حسب الحزمة الأصلية (أثقل 20 حزمة)
           pkg_code_bytes = collections.Counter()
           pkg_dex_classes = collections.Counter()
           pkg_dex_methods = collections.Counter()
@@ -585,7 +567,6 @@ jobs:
           with open(breakdown_file, "w", encoding="utf-8") as out:
               out.write(breakdown_text)
 
-          # نشر الملخص في صفحة GitHub Actions Summary
           summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
           if summary_path:
               with open(summary_path, "a", encoding="utf-8") as sf:
@@ -597,7 +578,6 @@ jobs:
           PYEOF
           exit 0
 
-      # 9. تجهيز أقسام R8 المنفصلة + ضغط مجلدات التصحيح وجمع سجلات التشخيص
       - name: Package Merged Native Libs & Organize Separated R8 Artifacts
         if: always()
         run: |
@@ -639,7 +619,6 @@ jobs:
             done
           fi
 
-          # تقسيم مخرجات R8 إلى مجلدات منفصلة للرفع كـ Artifacts مستقلة
           if [ -d "app/build/outputs/mapping/release" ]; then
             cp -r app/build/outputs/mapping/release aab_diagnostics_package/r8_mapping_and_seeds
             for f in seeds.txt usage.txt configuration.txt resources.txt; do
@@ -668,32 +647,24 @@ jobs:
           cp -f build_logs/*.log build_logs/*.txt aab_diagnostics_package/logs/ 2>/dev/null || true
           zip -r "build_logs/budget-app-aab-diagnostics-${APP_VERSION}-${{ github.run_number }}.zip" aab_diagnostics_package/ || true
 
-      # 9-ب. عند حدوث خطأ في البناء: تلخيص وتجميل الأخطاء والتحذيرات في Job Summary (مع إزالة ضجيج stacktrace)
       - name: Publish Clean Error & Warning Summary to Job Summary
         if: ${{ failure() || env.BUILD_FAILED == 'true' }}
         run: |
           set +e
           python3 - << 'PYEOF'
           import os, re
-
           log_path = "build_logs/build_full.log"
           summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
           ver = os.environ.get("APP_VERSION", "unknown")
           btype = os.environ.get("SELECTED_TYPE", "both")
-
           out = [f"# ❌ ملخص فشل البناء — الإصدار v{ver} ({btype})\n"]
-
           if not os.path.exists(log_path) or os.path.getsize(log_path) == 0:
-              out.append("⚠️ لم يتوفر سجل داخل `build_logs/build_full.log` (ربما فشل البناء في خطوة تهيئة مبكرة).")
+              out.append("⚠️ لم يتوفر سجل داخل `build_logs/build_full.log`.")
           else:
               lines = open(log_path, encoding="utf-8", errors="ignore").read().splitlines()
-
-              # 1) المهام التي فشلت
               failed_tasks = [l.strip() for l in lines if l.startswith("> Task ") and l.endswith("FAILED")]
               if failed_tasks:
                   out.append("## 🎯 المهمة التي فشلت\n```text\n" + "\n".join(dict.fromkeys(failed_tasks)) + "\n```\n")
-
-              # 2) استخراج كتلة What went wrong صافية بدون سطور stacktrace
               what_wrong = []
               capture = False
               for l in lines:
@@ -707,52 +678,31 @@ jobs:
                           continue
                       what_wrong.append(l)
               if what_wrong:
-                  out.append("## 🔎 سبب الفشل المباشر (What went wrong)\n```text\n" + "\n".join(what_wrong[:40]) + "\n```\n")
-
-              # 3) أخطاء المترجم / R8 / التوقيع (بدون تكرار وبعيداً عن سطور at ...)
+                  out.append("## 🔎 سبب الفشل المباشر\n```text\n" + "\n".join(what_wrong[:40]) + "\n```\n")
               err_pat = re.compile(r"(error:|ERROR:|❌|cannot find symbol|Missing classes|Duplicate class|Execution failed for task|Caused by:|FAILURE:)")
               errors = []
               seen_err = set()
               for i, l in enumerate(lines):
                   s = l.strip()
-                  if not s or s.startswith("at ") or s.startswith("... "):
-                      continue
+                  if not s or s.startswith("at ") or s.startswith("... "): continue
                   if err_pat.search(s) and s not in seen_err:
                       seen_err.add(s)
                       errors.append(s)
-                      # إرفاق السطر التالي إذا كان يوضّح موضع الخطأ في الكود (مثل ^)
                       if i + 1 < len(lines) and ("^" in lines[i + 1] or lines[i + 1].strip().startswith("symbol:")):
                           errors.append(lines[i + 1].rstrip())
               if errors:
-                  out.append("## 🚨 تفاصيل الأخطاء المستخرجة\n```text\n" + "\n".join(errors[:40]) + "\n```\n")
-
-              # 4) تجميع التحذيرات المهمة بدون تكرار
-              warn_pat = re.compile(r"(warning:|WARNING:|⚠️|Multiple substitutions|deprecated API|unchecked or unsafe|Missing class)")
-              warnings = []
-              seen_warn = set()
-              for l in lines:
-                  s = l.strip()
-                  if not s or s.startswith("at "):
-                      continue
-                  if warn_pat.search(s) and s not in seen_warn:
-                      seen_warn.add(s)
-                      warnings.append(s)
-              if warnings:
-                  out.append(f"## ⚠️ أبرز التحذيرات ({len(warnings)})\n```text\n" + "\n".join(warnings[:25]) + "\n```\n")
-
-              # 5) آخر 20 سطر مطوية كاحتياط
-              out.append("<details>\n<summary>📄 عرض آخر 20 سطر من سجل البناء (احتياطي)</summary>\n\n```text\n" + "\n".join(lines[-20:]) + "\n```\n</details>\n")
-
+                  out.append("## 🚨 تفاصيل الأخطاء\n```text\n" + "\n".join(errors[:40]) + "\n```\n")
+              out.append("<details>\n<summary>📄 عرض آخر 20 سطر</summary>\n\n```text\n" + "\n".join(lines[-20:]) + "\n```\n</details>\n")
           text = "\n".join(out) + "\n"
           if summary_path:
               with open(summary_path, "a", encoding="utf-8") as sf:
                   sf.write(text)
-          print(text[:3000])
           PYEOF
 
-      # 10. في حال حدوث أي خطأ في المفتاح أو البناء: رفع سجلات الأخطاء فوراً إلى Artifacts
+      # ✅ إضافة continue-on-error لجميع خطوات الرفع لمنع فشل الوركفلو عند امتلاء المساحة
       - name: Upload Error Logs on Failure
         if: ${{ env.BUILD_FAILED == 'true' || failure() }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: budget-app-${{ env.SELECTED_TYPE }}-errors-${{ env.APP_VERSION }}-${{ github.run_number }}
@@ -766,16 +716,15 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # 11. إيقاف الوركفلو رسمياً بعد التأكد من رفع ملفات اللوج في حال فشل المفتاح أو البناء
       - name: Fail Job After Uploading Logs
         if: ${{ env.BUILD_FAILED == 'true' }}
         run: |
-          echo "⛔ تم إيقاف الوركفلو بسبب عدم تطابق بصمة مفتاح التحميل أو فشل البناء. راجع الملخص أو error_summary.log."
+          echo "⛔ تم إيقاف الوركفلو بسبب فشل البناء. راجع الملخص."
           exit 1
 
-      # 12. رفع حزمة APK (تظل كما هي تماماً بدون أي إضافات)
       - name: Upload Release APK Artifact
         if: ${{ success() && (github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both') }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: budget-app-apk-${{ env.APP_VERSION }}-${{ github.run_number }}
@@ -785,9 +734,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # 13. رفع حزمة AAB (تظل كما هي تماماً بدون أي إضافات)
       - name: Upload Release AAB & Diagnostics Artifact
         if: ${{ success() && (github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both') }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: budget-app-aab-${{ env.APP_VERSION }}-${{ github.run_number }}
@@ -799,9 +748,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # 13-أ. مرفق مستقل 1: تقارير DEX و r8.json وتفكيك الحزم (أحجام صغيرة جداً)
       - name: Upload Separated Artifact 1 - DEX & R8 Summaries
         if: ${{ success() }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: 01-dex-and-r8-summaries-${{ env.APP_VERSION }}-${{ github.run_number }}
@@ -810,9 +759,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # 13-ب. مرفق مستقل 2: ملفات seeds و usage و configuration و resources
       - name: Upload Separated Artifact 2 - R8 Seeds, Usage & Config
         if: ${{ success() }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: 02-r8-seeds-usage-config-${{ env.APP_VERSION }}-${{ github.run_number }}
@@ -821,9 +770,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # 13-ج. مرفق مستقل 3: ملف mapping.txt مضغوط لوحده
       - name: Upload Separated Artifact 3 - R8 Mapping Only
         if: ${{ success() }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: 03-r8-mapping-${{ env.APP_VERSION }}-${{ github.run_number }}
@@ -832,9 +781,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # 13-د. مرفق مستقل 4: تقارير البناء إن وجدت
       - name: Upload Separated Artifact 4 - App Reports
         if: ${{ success() }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: 04-app-reports-${{ env.APP_VERSION }}-${{ github.run_number }}
@@ -843,9 +792,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # 14. فحص وإنشاء أو تحديث فرع الإصدار بتوقيت عدن مع استرجاع كافة ملفات المستودع لحالتها الأصلية قبل الحفظ
+      # ✅ تعديل هذا القسم ليعمل دائماً (حتى لو امتلأت مساحة GitHub)
       - name: Create or Update Version Branch
-        if: ${{ success() && github.event.inputs.update_branch == 'true' }}
+        if: ${{ always() && github.event.inputs.update_branch == 'true' && env.BUILD_FAILED != 'true' }}
         run: |
           set -e
           mkdir -p /tmp/new_release_files
@@ -856,20 +805,15 @@ jobs:
             unzip -o "$DIAG_ZIP" -d /tmp/diagnostics_extracted > /dev/null 2>&1 || true
             if [ -d "/tmp/diagnostics_extracted/aab_diagnostics_package" ]; then
               cp -rf /tmp/diagnostics_extracted/aab_diagnostics_package/* /tmp/new_release_files/ 2>/dev/null || true
-              echo "📦 تم استخراج مكونات ملف التشخيص وإضافتها إلى ملفات فرع الإصدار."
             fi
           fi
 
           for f in app/build/outputs/apk/release/*.apk; do
-            if [ -f "$f" ]; then
-              cp -f "$f" /tmp/new_release_files/
-            fi
+            if [ -f "$f" ]; then cp -f "$f" /tmp/new_release_files/; fi
           done
 
           for f in app/build/outputs/bundle/release/*.aab; do
-            if [ -f "$f" ]; then
-              cp -f "$f" "/tmp/new_release_files/MySmartWallet-v${APP_VERSION}.aab"
-            fi
+            if [ -f "$f" ]; then cp -f "$f" "/tmp/new_release_files/MySmartWallet-v${APP_VERSION}.aab"; fi
           done
 
           if [ -f "build_logs/native-debug-symbols-${APP_VERSION}.zip" ]; then
@@ -903,15 +847,11 @@ jobs:
           fi
 
           for f in /tmp/new_release_files/*.apk; do
-            if [ -f "$f" ]; then
-              rm -f release_builds/*.apk
-            fi
+            if [ -f "$f" ]; then rm -f release_builds/*.apk; fi
           done
 
           for f in /tmp/new_release_files/*.aab; do
-            if [ -f "$f" ]; then
-              rm -f release_builds/*.aab
-            fi
+            if [ -f "$f" ]; then rm -f release_builds/*.aab; fi
           done
 
           cp -rf /tmp/new_release_files/. release_builds/ 2>/dev/null || true
@@ -928,13 +868,18 @@ jobs:
           git commit -m "Release v${APP_VERSION} [${SELECTED_TYPE}] - ${ADEN_COMMIT_TIME} Aden Time - Run #${{ github.run_number }}" || echo "No changes to commit"
           git push origin "HEAD:refs/heads/${APP_VERSION}" --force
 
-      # 14-ب. إعلام عند تخطي قسم تحديث الفرع
-      - name: Skip Version Branch Update (update_branch = false)
+      - name: Skip Version Branch Update
         if: ${{ success() && github.event.inputs.update_branch != 'true' }}
         run: |
           echo "ℹ️ تم تخطي قسم إنشاء/تحديث فرع الإصدار لأن خيار update_branch غير مفعّل."
 
-      # 15. مسح ملف المفتاح المؤقت والنسخ الاحتياطية من الخادم بعد انتهاء العملية للأمان
-      - name: Clean Up Keystore
+      - name: Clean Up Keystore & Secrets
         if: always()
-        run: rm -f "${{ github.workspace }}/app/release.jks" local.properties /tmp/new_release_files/* /tmp/original_build_gradle.bak 2>/dev/null || true
+        run: rm -f "${{ github.workspace }}/app/release.jks" local.properties app/google-services.json /tmp/new_release_files/* /tmp/original_build_gradle.bak 2>/dev/null || true
+      # ✅ حذف بيئة العمل بالكامل بعد الانتهاء لضمان الأمان
+      - name: Delete Workspace Environment
+        if: always()
+        run: |
+          echo "🧹 جاري مسح بيئة العمل..."
+          rm -rf ${{ github.workspace }}/* || true
+          rm -rf ${{ github.workspace }}/.* || true

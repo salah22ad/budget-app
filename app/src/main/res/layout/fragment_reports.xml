@@ -97,7 +97,7 @@
                         android:textColor="@color/income_green"
                         android:textSize="18sp"
                         android:fontFamily="sans-serif-medium"
-                        tools:text="5,000 ج.م" />
+                        tools:text="5,000" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -135,7 +135,7 @@
                         android:textColor="@color/expense_red"
                         android:textSize="18sp"
                         android:fontFamily="sans-serif-medium"
-                        tools:text="3,500 ج.م" />
+                        tools:text="3,500" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
@@ -176,7 +176,7 @@
                         android:textColor="@color/primary"
                         android:textSize="16sp"
                         android:fontFamily="sans-serif-medium"
-                        tools:text="5,000 ج.م" />
+                        tools:text="5,000" />
                 </LinearLayout>
 
                 <com.google.android.material.progressindicator.LinearProgressIndicator

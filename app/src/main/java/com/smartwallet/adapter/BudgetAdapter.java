@@ -26,7 +26,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
     private final Context context;
     private final List<Budget> budgets = new ArrayList<>();
     private final OnBudgetClickListener listener;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("d MMM", FormatUtils.AR_EG);
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("d MMM", Locale.US);
 
     public interface OnBudgetClickListener {
         void onBudgetClick(Budget budget);

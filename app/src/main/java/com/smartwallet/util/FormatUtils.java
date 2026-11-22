@@ -8,82 +8,47 @@ import java.util.Locale;
 
 public class FormatUtils {
 
-    /**
-     * ✅ اللغة الموحّدة للتطبيق: عربي (مصر).
-     * تُستخدم في كل تنسيقات الأرقام والتواريخ لضمان الاتساق.
-     * ملاحظة: ar-EG يعرض الأرقام العربية-الهندية (٠١٢٣...)
-     * إن أردت الأرقام اللاتينية (0123...) بدّلها إلى new Locale("ar")
-     */
-    public static final Locale AR_EG = new Locale("ar", "EG");
+    // ✅ توحيد الأرقام إلى اللاتينية (123)
+    public static final Locale LOCALE = Locale.US;
 
-    // ✅ العملة الموحّدة: ج.م
-    public static final String CURRENCY_SUFFIX = " ج.م";
-
-    private static final SimpleDateFormat DATE_FORMAT =
-            new SimpleDateFormat("dd/MM/yyyy", AR_EG);
-    private static final SimpleDateFormat TIME_FORMAT =
-            new SimpleDateFormat("hh:mm a", AR_EG);
-    private static final SimpleDateFormat DATE_TIME_FORMAT =
-            new SimpleDateFormat("dd/MM/yyyy hh:mm a", AR_EG);
-    private static final SimpleDateFormat MONTH_YEAR_FORMAT =
-            new SimpleDateFormat("MMMM yyyy", AR_EG);
-    private static final SimpleDateFormat DAY_NAME_FORMAT =
-            new SimpleDateFormat("EEEE", AR_EG);
-
-    // --- Currency ---
+    // ✅ إزالة رمز العملة (ج.م) ليكون التطبيق عالمياً
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy", LOCALE);
+    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("hh:mm a", LOCALE);
+    private static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("dd/MM/yyyy hh:mm a", LOCALE);
+    private static final SimpleDateFormat MONTH_YEAR_FORMAT = new SimpleDateFormat("MMMM yyyy", LOCALE);
+    private static final SimpleDateFormat DAY_NAME_FORMAT = new SimpleDateFormat("EEEE", LOCALE);
 
     public static String formatCurrency(double amount) {
-        return formatNumber(amount) + CURRENCY_SUFFIX;
-    }
-
-    public static String formatCurrencyWithoutSuffix(double amount) {
         return formatNumber(amount);
     }
 
-    /** تنسيق رقم عام بأرقام عربية متسقة */
     public static String formatNumber(double amount) {
-        NumberFormat nf = NumberFormat.getNumberInstance(AR_EG);
+        NumberFormat nf = NumberFormat.getNumberInstance(LOCALE);
         nf.setMinimumFractionDigits(0);
         nf.setMaximumFractionDigits(2);
         return nf.format(amount);
     }
 
-    // --- Dates ---
-
-    public static String formatDate(long timestamp) {
-        return DATE_FORMAT.format(new Date(timestamp));
-    }
-
-    public static String formatTime(long timestamp) {
-        return TIME_FORMAT.format(new Date(timestamp));
-    }
-
-    public static String formatDateTime(long timestamp) {
-        return DATE_TIME_FORMAT.format(new Date(timestamp));
-    }
-
-    public static String formatMonthYear(long timestamp) {
-        return MONTH_YEAR_FORMAT.format(new Date(timestamp));
-    }
-
-    public static String formatDayName(long timestamp) {
-        return DAY_NAME_FORMAT.format(new Date(timestamp));
-    }
+    public static String formatDate(long timestamp) { return DATE_FORMAT.format(new Date(timestamp)); }
+    public static String formatTime(long timestamp) { return TIME_FORMAT.format(new Date(timestamp)); }
+    public static String formatDateTime(long timestamp) { return DATE_TIME_FORMAT.format(new Date(timestamp)); }
+    public static String formatMonthYear(long timestamp) { return MONTH_YEAR_FORMAT.format(new Date(timestamp)); }
+    public static String formatDayName(long timestamp) { return DAY_NAME_FORMAT.format(new Date(timestamp)); }
 
     public static String formatRelativeDate(long timestamp) {
         Calendar today = Calendar.getInstance();
         Calendar date = Calendar.getInstance();
         date.setTimeInMillis(timestamp);
 
-        if (isSameDay(today, date)) return "اليوم";
+        if (isSameDay(today, date)) return "Today";
 
         Calendar yesterday = Calendar.getInstance();
         yesterday.add(Calendar.DAY_OF_YEAR, -1);
-        if (isSameDay(yesterday, date)) return "أمس";
+        if (isSameDay(yesterday, date)) return "Yesterday";
 
         Calendar tomorrow = Calendar.getInstance();
         tomorrow.add(Calendar.DAY_OF_YEAR, 1);
-        if (isSameDay(tomorrow, date)) return "غداً";
+        if (isSameDay(tomorrow, date)) return "Tomorrow";
 
         return DATE_FORMAT.format(new Date(timestamp));
     }
@@ -94,10 +59,8 @@ public class FormatUtils {
     }
 
     public static String formatPercentage(double value) {
-        return String.format(AR_EG, "%.1f%%", value);
+        return String.format(LOCALE, "%.1f%%", value);
     }
-
-    // --- Time boundaries ---
 
     public static long getStartOfDay(long timestamp) {
         Calendar c = Calendar.getInstance();

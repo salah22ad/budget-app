@@ -163,7 +163,7 @@
                     app:boxCornerRadiusTopStart="12dp"
                     app:boxStrokeColor="@color/primary"
                     app:hintTextColor="@color/text_hint"
-                    app:prefixText="ج.م ">
+                    >
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etBudget"

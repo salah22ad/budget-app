@@ -166,7 +166,7 @@ public class ReportsFragment extends Fragment {
 
         // ✅ استخدام Locale.US لمطابقة مخرجات SQLite
         SimpleDateFormat keyFormat = new SimpleDateFormat("yyyy-MM", Locale.US);
-        SimpleDateFormat labelFormat = new SimpleDateFormat("MMM", FormatUtils.AR_EG);
+        SimpleDateFormat labelFormat = new SimpleDateFormat("MMM", Locale.US);
 
         Calendar cursor = (Calendar) start.clone();
         for (int i = 0; i < 6; i++) {

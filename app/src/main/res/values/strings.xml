@@ -116,7 +116,6 @@
 
     <!-- Currency -->
     <string name="currency_symbol">ج.م</string>
-    <string name="egp">ج.م</string>
     <string name="usd">$</string>
 
     <!-- Settings additions -->
