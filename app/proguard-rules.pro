@@ -25,14 +25,14 @@
 -keep class * extends androidx.room.RoomDatabase {
     <init>();
 }
--keep class com.smartwallet.data.database.*_Impl {
+-keep class com.smartwallet.database.*_Impl {
     <init>(...);
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 3. حماية حقول النماذج (Models) فقط لضمان عمل Gson دون تعطيل تمويه الكلاسات والدوال
 # ──────────────────────────────────────────────────────────────────────────────
--keepclassmembers class com.smartwallet.data.model.** {
+-keepclassmembers class cl.** {
     <fields>;
     <init>(...);
 }
@@ -62,53 +62,10 @@
     public static final ** CREATOR;
 }
 
-# ──────────────────────────────────────────────────────────────────────────────
-# 4. حماية البانيات (Constructors) المطلوبة بالانعكاس فقط
-# ──────────────────────────────────────────────────────────────────────────────
--keepclassmembers class * extends androidx.lifecycle.ViewModel {
-    public <init>(...);
-}
--keepclassmembers class * extends androidx.lifecycle.AndroidViewModel {
-    public <init>(android.app.Application);
-}
--keep class * extends androidx.work.ListenableWorker {
-    public <init>(android.content.Context, androidx.work.WorkerParameters);
-}
--keepclassmembers class * extends android.view.View {
-    public <init>(android.content.Context);
-    public <init>(android.content.Context, android.util.AttributeSet);
-    public <init>(android.content.Context, android.util.AttributeSet, int);
-}
 
-# ──────────────────────────────────────────────────────────────────────────────
-# 5. حماية Parcelable و Serializable
-# ──────────────────────────────────────────────────────────────────────────────
--keepclassmembers class * implements android.os.Parcelable {
-    public static final ** CREATOR;
-}
--keepclassmembers class * implements java.io.Serializable {
-    static final long serialVersionUID;
-    private static final java.io.ObjectStreamField[] serialPersistentFields;
-    private void writeObject(java.io.ObjectOutputStream);
-    private void readObject(java.io.ObjectInputStream);
-    java.lang.Object writeReplace();
-    java.lang.Object readResolve();
-}
 
-# ──────────────────────────────────────────────────────────────────────────────
-# 6. كتم التحذيرات فقط (المكتبات الحديثة تضيف قواعدها تلقائياً من الـ AAR)
-# ──────────────────────────────────────────────────────────────────────────────
--dontwarn okhttp3.**
--dontwarn okio.**
--dontwarn retrofit2.**
--dontwarn javax.annotation.**
--dontwarn org.codehaus.mojo.animal_sniffer.**
--dontwarn kotlin.**
--dontwarn kotlinx.**
--dontwarn com.google.errorprone.annotations.**
--dontwarn com.google.api.client.**
--dontwarn javax.lang.model.element.Modifier
--dontwarn org.joda.time.Instant
+
+
 
 
 
@@ -154,6 +111,14 @@
 -keepclassmembers class * extends androidx.databinding.ViewDataBinding {
     <init>(...);
 }
+-keepclasseswithmembers class * {
+    public static ** inflate(...);
+}
+
+# ==========================================
+# Gson / Serialization (if used)
+# ==========================================
+-keep class sun.misc.Unsafe { *; }
 -keep class com.google.gson.stream.** { *; }
 
 # ==========================================
